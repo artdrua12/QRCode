@@ -82,7 +82,7 @@ function stopScan() {
 </template>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=Lobster&display=swap");
+
 .container {
   width: auto;
   min-height: 300px;
