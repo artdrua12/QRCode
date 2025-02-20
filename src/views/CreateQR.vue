@@ -55,7 +55,7 @@ function downLoadQR() {
 
     <label class="form-control"> Размер </label>
     <select v-model="size" @change="generateCode">
-      <option v-for="i in 5" :value="100 * i" :key="i">
+      <option v-for="i in 3" :value="100 * i" :key="i">
         {{ i * 100 }}
       </option>
     </select>
@@ -68,30 +68,16 @@ function downLoadQR() {
 
     <div v-if="text" ref="code" class="code full"></div>
 
-    <button class="button full" @click="downLoadQR">Загрузить</button>
+    <button class="button full" @click="downLoadQR">Сохранить QR</button>
   </fieldset>
 </template>
 
 
 <style scoped>
-.container {
-  border: 3px solid;
-  border-radius: 7px;
-  font-family: "Lobster", serif;
-  min-width: 400px;
-  margin: auto;
-  display: grid;
-  grid-template-columns: auto auto;
-  gap: 15px 25px;
-  padding: 20px;
-  font-size: 18px;
+input {
+  width: 100%;
+  height: 100%;
 }
-
-legend {
-  font-size: 24px;
-  padding: 0px 10px;
-}
-
 .code {
   border: 2px dashed black;
   border-radius: 3px;
@@ -101,14 +87,4 @@ legend {
   animation: fadeIn 1s;
 }
 
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-    scale: 0;
-  }
-  100% {
-    opacity: 1;
-    scale: 1;
-  }
-}
 </style>

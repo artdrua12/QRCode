@@ -14,7 +14,7 @@ import HelloWorld from "./components/HelloWorld.vue";
 
       <nav>
         <RouterLink to="/create">Создание QR кода</RouterLink>
-        <RouterLink to="/read">Чтение QR кода из картинки </RouterLink>
+        <RouterLink to="/read">Прочитать QR код из картинки </RouterLink>
         <RouterLink to="/readCamera">Сканирование QR кода камерой </RouterLink>
       </nav>
     </div>
@@ -60,10 +60,12 @@ import HelloWorld from "./components/HelloWorld.vue";
 
 <style scoped>
 header {
-  line-height: 1.5;
   max-height: 100vh;
+  background-color: var(--vt-c-indigo);
+  color: var(--vt-c-white);
+  padding: 1rem;
+  font-family: "Lobster", cursive;
 }
-
 
 nav {
   width: 100%;
@@ -96,9 +98,7 @@ nav a:first-of-type {
   header {
     display: flex;
     place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
   }
-
 
   header .wrapper {
     display: flex;

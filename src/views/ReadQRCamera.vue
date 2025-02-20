@@ -1,6 +1,6 @@
 <script setup>
 import { useSnackStore } from "@/stores/snackStore";
-import { ref } from "vue";
+import { ref, useTemplateRef } from "vue";
 import IconCamera from "@/components/icons/IconCamera.vue";
 const snack = useSnackStore();
 
@@ -8,6 +8,7 @@ const scanner = ref();
 const text = ref("");
 const isGetText = ref(false);
 const isScan = ref(true);
+const imgv = useTemplateRef("imgv");
 
 function scanQRImage() {
   isGetText.value = true;
@@ -33,8 +34,7 @@ function scanQRImage() {
     scanner.value.addListener("scan", (textQR, image) => {
       if (scanner.value) {
         stopScan();
-        const my = document.getElementById("image");
-        my.src = image;
+        imgv.value.src = image;
         text.value = textQR;
         snack.setSnack({
           text: "QR код успешно прочитан",
@@ -54,66 +54,53 @@ function stopScan() {
   scanner.value.stop();
   isScan.value = false;
 }
+
+function newScan() {
+  scanner.value.stop();
+  isGetText.value = !isGetText.value;
+  isScan.value = true;
+  text.value = "";
+}
 </script>
 
 <template>
-  <div class="container">
-    <div class="scanImage" @click="scanQRImage">
-      <IconCamera v-show="!isGetText" />
-      <span v-show="!isGetText">сканировать QR-код с помощью камеры</span>
-      <div v-show="isGetText">
-        <video v-show="isScan" id="video"></video>
-        <img v-show="!isScan" alt="qr" id="image" height="300px" />
-      </div>
+  <fieldset class="container">
+    <legend>Сканирование QR кода камерой</legend>
+    <div class="scanImage scanImage--center full" @click="scanQRImage" v-show="!isGetText">
+      <IconCamera />
+      <span>сканировать QR-код камерой</span>
     </div>
-    <textarea v-show="isGetText" v-model="text" rows="2"></textarea>
-    <button
-      v-show="isGetText"
-      @click="
-        isGetText = !isGetText;
-        isScan = true;
-        text.value = '';
-      "
-      class="button"
-    >
-      Сбросить
-    </button>
-  </div>
+    <div v-show="isGetText" class="scanImage full">
+      <video v-show="isScan" id="video"></video>
+      <img ref="imgv" v-show="!isScan" alt="qr" id="image" height="300px" />
+
+      <textarea v-model="text" rows="2"></textarea>
+      <button @click="newScan" class="button">Сбросить</button>
+    </div>
+  </fieldset>
 </template>
 
 <style scoped>
-
-.container {
-  width: auto;
-  min-height: 300px;
-  font-family: "Lobster", serif;
-  display: grid;
-  grid-gap: 30px;
-  font-size: 18px;
-}
-
 .scanImage {
-  border: 3px dashed black;
-  border-radius: 7px;
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
+  align-items: stretch;
+  cursor: pointer;
+  gap: 20px;
+}
+
+.scanImage--center {
   justify-content: center;
-  align-items: center;
-  cursor: pointer;
+  align-items:center;
+  gap: 0px;
 }
-.button {
-  padding: 10px 20px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 7px;
-  cursor: pointer;
-}
+
 video {
   width: 100%;
   height: 300px;
+  margin: auto;
 }
 img {
   object-fit: cover;

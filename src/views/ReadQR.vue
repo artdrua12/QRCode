@@ -2,44 +2,49 @@
 import { useSnackStore } from "@/stores/snackStore";
 import { useRequestStore } from "@/stores/requestStore";
 import IconQR from "@/components/icons/IconQR.vue";
-import { ref } from "vue";
+import { ref, useTemplateRef } from "vue";
 const snack = useSnackStore();
 const requests = useRequestStore();
 const text = ref("");
 const isGetText = ref(false);
+const img = useTemplateRef("img");
 
-function uploadFile(files) {
-  if (!files) return;
+async function uploadFile(files) {
+  console.log("files", files);
+
+  if (!files) {
+    snack.setSnack({
+      text: "Вы не выбрали файл",
+      type: "error",
+    });
+    return;
+  }
 
   if (/\.(jpe?g|png)$/i.test(files[0].name)) {
-    const reader = new FileReader();
-    reader.readAsDataURL(files[0]);
-
     let formData = new FormData();
     formData.append("file", files[0]);
-    reader.onloadend = async () => {
-      const response = await requests.post(
-        "http://api.qrserver.com/v1/read-qr-code/",
-        formData
-      );
-      const data = response.data;
-      if(!data){
-        snack.setSnack({
-          text: "Ошибка при распознавании QR-кода",
-          type: "error",
-        });
-        return;
-      }
 
-      isGetText.value = true;
-      const img = document.getElementById("image");
-      img.src = URL.createObjectURL(files[0]);
-      text.value = data[0].symbol[0].data;
+    const response = await requests.post(
+      "https://api.qrserver.com/v1/read-qr-code/",
+      formData
+    );
+    text.value = response[0]?.symbol[0]?.data;
+
+    if (!text.value) {
       snack.setSnack({
-        text: "QR код успешно прочитан",
-        type: "info",
+        text: "Ошибка при распознавании QR-кода",
+        type: "error",
       });
-    };
+      return;
+    }
+
+    isGetText.value = true;
+    img.value.src = URL.createObjectURL(files[0]);
+
+    snack.setSnack({
+      text: "QR код успешно прочитан",
+      type: "info",
+    });
   } else {
     snack.setSnack({
       text: "Вы можете загружать только изображения формата jpeg или png ",
@@ -50,40 +55,38 @@ function uploadFile(files) {
 </script>
 
 <template>
-  <div class="container">
-    <label class="scanImage">
-      <IconQR v-show="!isGetText" />
-      <span v-show="!isGetText">загрузить QR-код</span>
+  <fieldset class="container">
+    <legend>Прочитать QR-код из картинки</legend>
+    <label class="scanImage full" v-if="!isGetText">
+      <IconQR />
+      <span>загрузить QR-код</span>
       <input
         type="file"
         name="qr"
         accept="image/*"
-        @change="(e) => uploadFile(e?.target?.files)"
+        @input="(e) => uploadFile(e?.target?.files)"
         hidden
       />
-      <img v-show="isGetText" alt="qr" id="image" height="150px" />
     </label>
-    <textarea v-show="isGetText" v-model="text" rows="2"></textarea>
-    <button v-show="isGetText" @click="isGetText = !isGetText" class="button">
+    <img v-show="isGetText" alt="qr" ref="img" height="150px" class="full" />
+    <textarea
+      v-show="isGetText"
+      v-model="text"
+      rows="2"
+      class="full"
+    ></textarea>
+    <button
+      v-show="isGetText"
+      @click="isGetText = !isGetText"
+      class="button full"
+    >
       Сбросить
     </button>
-  </div>
+  </fieldset>
 </template>
 
 <style scoped>
-
-.container {
-  width: auto;
-  min-height: 300px;
-  font-family: "Lobster", serif;
-  display: grid;
-  grid-gap: 30px;
-  font-size: 18px;
-}
-
 .scanImage {
-  border: 3px dashed black;
-  border-radius: 7px;
   width: 100%;
   height: 100%;
   display: flex;
@@ -92,12 +95,8 @@ function uploadFile(files) {
   align-items: center;
   cursor: pointer;
 }
-.button {
-  padding: 10px 20px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 7px;
-  cursor: pointer;
+
+img {
+  margin: auto;
 }
 </style>
