@@ -1,17 +1,20 @@
 <script setup >
 import { useSnackStore } from "@/stores/snackStore";
-import { ref } from "vue";
+import { ref, useTemplateRef } from "vue";
 
 const snack = useSnackStore();
 const text = ref("");
 const size = ref("100");
 const color = ref("#000000");
 const bgColor = ref("#ffffff");
+const code = useTemplateRef("code");
 
 function generateCode() {
-  let el = document.querySelector("#img");
-  el.innerHTML = "";
-  new QRCode(el, {
+  if (!text.value) {
+    return;
+  }
+  code.value.innerHTML = "";
+  new QRCode(code.value, {
     text: text.value,
     width: size.value,
     height: size.value,
@@ -19,11 +22,33 @@ function generateCode() {
     colorLight: bgColor.value,
   });
 }
+
+function downLoadQR() {
+  if (!text.value) {
+    snack.setSnack({
+      text: "Необходимо ввести текст для создания QR кода",
+      type: "error",
+    });
+    return;
+  }
+  const src = code.value.childNodes[1].src;
+  if (!src) {
+    snack.setSnack({
+      text: "Ошибка при прочтении src QR кода",
+      type: "error",
+    });
+    return;
+  }
+  let a = document.createElement("a");
+  a.href = src;
+  a.download = "QRcode.png";
+  a.click();
+}
 </script>
 
 <template>
-  <div class="container">
-    <!-- <legend>Создание кода</legend> -->
+  <fieldset class="container">
+    <legend>Создание кода</legend>
 
     <label class="form-control"> Текст </label>
     <input v-model="text" @keyup="generateCode()" />
@@ -41,27 +66,35 @@ function generateCode() {
     <label class="form-control"> Цвет фона </label>
     <input type="color" v-model="bgColor" @change="generateCode" />
 
-    <div id="img" class="full"></div>
+    <div v-if="text" ref="code" class="code full"></div>
 
-    <button class="button full">Загрузить</button>
-  </div>
+    <button class="button full" @click="downLoadQR">Загрузить</button>
+  </fieldset>
 </template>
 
 
 <style scoped>
 .container {
-  border: 3px dashed black;
+  border: 3px solid;
   border-radius: 7px;
   font-family: "Lobster", serif;
-  min-width: 200px;
+  min-width: 400px;
   margin: auto;
   display: grid;
   grid-template-columns: auto auto;
-  gap: 10px 25px;
+  gap: 15px 25px;
   padding: 20px;
+  font-size: 18px;
 }
 
-#img {
+legend {
+  font-size: 24px;
+  padding: 0px 10px;
+}
+
+.code {
+  border: 2px dashed black;
+  border-radius: 3px;
   padding: 10px;
   display: flex;
   justify-content: center;

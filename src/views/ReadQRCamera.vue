@@ -89,6 +89,7 @@ function stopScan() {
   font-family: "Lobster", serif;
   display: grid;
   grid-gap: 30px;
+  font-size: 18px;
 }
 
 .scanImage {
