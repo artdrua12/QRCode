@@ -1,9 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import CreateQR from '../views/CreateQR.vue'
+import EnterQR from '@/views/EnterQR.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: '/',
+      name: 'enter',
+      component: EnterQR,
+    },
     {
       path: '/create',
       name: 'create',
